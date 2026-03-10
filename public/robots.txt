@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://win10.coh3.lipus/sitemap.xml
