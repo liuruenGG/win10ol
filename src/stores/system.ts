@@ -68,7 +68,7 @@ export const useSystemStore = defineStore("system", () => {
 
         // 自动切换对应主题的壁纸
         if (backgroundType.value === "图片") {
-            const themePath = `/images/desktop/${newTheme}/`;
+            const themePath = `images/desktop/${newTheme}/`;
             const options = wallOptions.value.filter(wall => wall.includes(themePath));
             if (options.length > 0) {
                 // 如果当前壁纸不属于新主题，则自动从对应主题中随机挑选一张
@@ -488,27 +488,27 @@ export const useSystemStore = defineStore("system", () => {
 
     // 壁纸
     const wallOptions = ref<string[]>([
-        "/images/desktop/light/green.jpg",
-        "/images/desktop/light/light.jpg",
-        "/images/desktop/light/light2.jpg",
-        "/images/desktop/light/light3.jpg",
-        "/images/desktop/light/light4.jpg",
-        "/images/desktop/light/light5.jpg",
-        "/images/desktop/light/Windows (1).jpg",
-        "/images/desktop/light/Windows (2).jpg",
-        "/images/desktop/dark/dark3.jpg",
-        "/images/desktop/dark/5.jpg",
-        "/images/desktop/dark/dark3.jpg",
-        "/images/desktop/dark/dark4.jpg",
-        "/images/desktop/dark/Fire Spiral.jpg",
-        "/images/desktop/dark/Layers.jpg",
-        "/images/desktop/dark/The Grid.jpg",
-        "/images/desktop/dark/Windows (3).jpg",
+        "images/desktop/light/green.jpg",
+        "images/desktop/light/light.jpg",
+        "images/desktop/light/light2.jpg",
+        "images/desktop/light/light3.jpg",
+        "images/desktop/light/light4.jpg",
+        "images/desktop/light/light5.jpg",
+        "images/desktop/light/Windows (1).jpg",
+        "images/desktop/light/Windows (2).jpg",
+        "images/desktop/dark/dark3.jpg",
+        "images/desktop/dark/5.jpg",
+        "images/desktop/dark/dark3.jpg",
+        "images/desktop/dark/dark4.jpg",
+        "images/desktop/dark/Fire Spiral.jpg",
+        "images/desktop/dark/Layers.jpg",
+        "images/desktop/dark/The Grid.jpg",
+        "images/desktop/dark/Windows (3).jpg",
     ]);
     const lockOptions = ref<string[]>([
-        "/images/lock/green.jpg",
-        "/images/lock/win10fish.jpg",
-        "/images/lock/Data Link.jpg",
+        "images/lock/green.jpg",
+        "images/lock/win10fish.jpg",
+        "images/lock/Data Link.jpg",
     ]);
     const colorOptions = ref<string[]>([
         "#0078d7",
