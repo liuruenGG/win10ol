@@ -16,15 +16,25 @@
                             <div class="lock-date">{{ dateDisplayLock }}</div>
                         </div>
 
-                        <div v-else class="login-box" @click.stop key="login-view">
-                            <div class="user-avatar">
-                                <img src="/icons/system/Contact.png" alt="User"></img>
-                            </div>
-                            <div class="user-name">Admin</div>
-                            <button class="login-button" @click="handleSystemLogin">登录</button>
-                            <div @click="systemStore.setShowLogin(false)"
-                                style="margin-top: 20px; cursor: pointer; font-size: 14px; opacity: 0.7;">
-                                返回
+                        <div v-else key="login-view" class="view-wrapper login-view" @click.stop>
+                            <div class="login-box">
+                                <div class="user-avatar">
+                                    <img src="/icons/system/Contact.png" alt="avatar" />
+                                </div>
+                                <div class="user-name">Admin</div>
+                                <div class="input-box">
+                                    <input class="input-login" type="password" v-model="inputPwd" @keyup.enter="handleSystemLogin" :disabled="loading" />
+                                    <button class="input-login-botton" @click="handleSystemLogin" :disabled="loading">
+                                        <img class="login-icon" src="/icons/system/Forward-white.png" alt="login" />
+                                    </button>
+                                </div>
+
+                                <div class="login-spinner-wrapper" v-if="loading">
+                                    <div class="loading-spinner" aria-hidden="true"></div>
+                                </div>
+
+                                <div class="login-error" v-if="loginError">{{ loginError }}</div>
+                                <div class="login-cancel" v-if="!loading" @click="systemStore.setShowLogin(false)">取消</div>
                             </div>
                         </div>
                     </Transition>
@@ -353,8 +363,33 @@ const getTibarLeftBtnIconStyle = (btn: any) => {
 const handleSystemLockScreenClick = () => {
     systemStore.handleLockScreenClick()
 }
+// 登录相关状态（保留 UI/动画，但不依赖 useSetting）
+const inputPwd = ref('');
+const loginError = ref('');
+const loading = ref(false);
+const MIN_LOADING_MS = 1000;
+let loadingStart = 0;
+
+const finishLoading = (cb?: () => void) => {
+    const elapsed = Date.now() - loadingStart;
+    const remain = Math.max(0, MIN_LOADING_MS - elapsed);
+    window.setTimeout(() => {
+        loading.value = false;
+        if (cb) cb();
+    }, remain);
+};
+
 const handleSystemLogin = () => {
-    systemStore.login();
+    if (loading.value) return;
+    loading.value = true;
+    loadingStart = Date.now();
+
+    // 无论输入什么密码，均允许进入系统
+    finishLoading(() => {
+        systemStore.login();
+        inputPwd.value = '';
+        loginError.value = '';
+    });
 };
 
 // --- 桌面应用排版与拖拽 ---
@@ -529,8 +564,8 @@ const vFocus = { mounted: (el: HTMLInputElement) => el.focus() };
     margin-bottom: 50px;
 }
 .login-box {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
+    /* background: rgba(255, 255, 255, 0.1); */
+    /* backdrop-filter: blur(5px); */
     padding: 40px;
     border-radius: 8px;
     display: flex;
@@ -554,6 +589,69 @@ const vFocus = { mounted: (el: HTMLInputElement) => el.focus() };
 .user-name {
     font-size: 28px;
     margin-bottom: 20px;
+}
+.input-box {
+    display: flex;
+    flex-direction: row;
+}
+.input-login {
+    width: 200px;
+    border: none;
+    outline:none;
+    box-shadow: none; 
+    caret-color: transparent;
+    padding-left: 12px;
+    box-sizing: border-box;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 25px;
+    letter-spacing: 1px;
+    background-color: rgba(255, 255, 255, 0.44);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none; 
+}
+.input-login-botton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.25);
+}
+.login-icon {
+    width: 14px;
+    height: 14px;
+}
+.login-error {
+    margin-top:8px;
+    color: rgb(255, 0, 0);
+}
+.login-cancel {
+    margin-top: 10px;
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+}
+
+/* loading spinner */
+.login-spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+.loading-spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.18);
+    border-top-color: rgba(255,255,255,0.95);
+    animation: spin 0.9s linear infinite;
+    box-sizing: border-box;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 .login-button {
     padding: 8px 40px;
