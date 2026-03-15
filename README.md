@@ -64,6 +64,9 @@ Windows 10 26H2 Concept (Windows on Web)
 - Styling: CSS3
 - Icons: 应用图标: Microsoft 官方 / 戌犬·朱狼 (根据 Fluent Design 风格仿制)，线性图标: Segoe MDL2 Assets
 
+## 下载方式
+将这个项目包 git clone 到你要存储的位置中，然后从项目包启动 CMD 以执行之后的操作。
+
 ## 快速启动
 
 ```bash
