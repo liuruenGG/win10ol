@@ -81,7 +81,7 @@
                 <!-- 新增：开源地址卡片 -->
                 <div class="repo-card" @click="openLink('https://github.com/COH3CC/win10ol')" role="button" title="打开开源仓库">
                     <div class="repo-left">
-                        <i class="icon-repo"></i>
+                        <img src="/icons/system/Windows 10X.png" class="icon-repo"></img>
                     </div>
                     <div class="repo-content">
                         <div class="repo-title">开源地址</div>
@@ -410,6 +410,11 @@ const openLink = (url: string) => {
 .win-close-btn:active {
     background: #bbb;
     transform: scale(0.98);
+}
+.icon-repo {
+    width: 20px;
+    height: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 /* 深色模式适配 */

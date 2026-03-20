@@ -49,12 +49,12 @@ export const useMenuStore = defineStore("menu", () => {
         {
             label: "显示设置",
             icon: "/icons/menu/System.png",
-            action: () => systemStore.openWindow("WinSetting", "设置"),
+            action: () => systemStore.openWindow("WinSetting", "设置", { initialCategory: 'sys', initialSub: '显示' }),
         },
         {
             label: "个性化",
             icon: "/icons/menu/Personalize.png",
-            action: () => console.log("个性化"),
+            action: () => systemStore.openWindow("WinSetting", "设置", { initialCategory: 'per', initialSub: '主题' }),
         },
         { type: "divider" },
         {
@@ -77,7 +77,7 @@ export const useMenuStore = defineStore("menu", () => {
         {
             label: "更多选项",
             icon: "/icons/menu/More.png",
-            action: () => console.log("更多"),
+            action: () =>systemStore.openWindow("WinSetting","设置",{initalCategory:'per',}),
         },
     ];
     const getIconMenu = (

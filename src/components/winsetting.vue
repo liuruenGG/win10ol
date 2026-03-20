@@ -277,6 +277,7 @@
                                         </button>
                                         <button class="setting-info-sys-right-btn" @click="toggleWinVersion">
                                             <img class="setting-info-sys-right-btn-img"
+                                                :style="{ transform: showWinVersion ? 'rotate(180deg)' : 'none' }"
                                                 src="/icons/Chevron Down.png" />
                                         </button>
                                     </div>
@@ -335,6 +336,7 @@
                                         </button>
                                         <button class="setting-info-sys-right-btn" @click="toggleDeviceInfo">
                                             <img class="setting-info-sys-right-btn-img"
+                                                :style="{ transform: showDeviceInfo ? 'rotate(180deg)' : 'none' }"
                                                 src="/icons/Chevron Down.png" />
                                         </button>
                                     </div>
@@ -515,7 +517,7 @@
                                                 <div class="setting-info-left">
                                                     <div class="setting-info-left-l">
                                                         <img class="setting-info-left-l-img"
-                                                            src="/icons/Photo 2.png" />
+                                                            src="/icons/system/Color.png" />
                                                     </div>
                                                     <div class="setting-info-left-r">
                                                         <div class="setting-info-left-r-top">颜色</div>
@@ -706,7 +708,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import WindowFrame from './WindowFrame.vue';
 import WindowControls from './WindowControls.vue';
@@ -715,6 +717,9 @@ import { useSystemStore } from '../stores/system';
 const props = defineProps<{
     windowId: number;
     isMaximized: boolean;
+    // 可选：打开设置时用于指定初始分类与子项
+    initialCategory?: string | null;
+    initialSub?: string | null;
 }>();
 
 const emit = defineEmits(['drag-start']);
@@ -823,7 +828,7 @@ const showLockWallpaperModeDropdown = ref(false);
 const wallpaperModes = ['图片', '纯色'];
 const showlockWallpaperDetail = ref(false);
 const showWallpaperDetail = ref(false);
-const showThemeDetail = ref(false);
+const showThemeDetail = ref(true);
 const showThemeModeDropdown = ref(false);
 const activeFloatBlockColor = ref(systemStore.theme === 'light' ? '#ffffffa9' : '#000000a9');
 
@@ -843,6 +848,38 @@ const selectCategory = (item: any) => {
         console.log(`${item.title} 菜单暂未开放`);
     }
 };
+
+// 如果通过 props 传入初始导航目标，则在挂载时跳转到对应页面
+onMounted(() => {
+    if (props.initialCategory) {
+        const item = menuItems.find((m) => m.id === props.initialCategory);
+        if (item) {
+            // 只允许切换到已实现的分类（与 selectCategory 保持一致）
+            selectCategory(item);
+            if (props.initialSub) {
+                currentSub.value = props.initialSub as string;
+            }
+        }
+    }
+});
+
+// 如果 props 在窗口已打开时被更新（例如已有设置窗口，之后从菜单再次触发）则响应并导航
+watch(
+    () => props.initialCategory,
+    (newVal) => {
+        if (newVal) {
+            const item = menuItems.find((m) => m.id === newVal);
+            if (item) selectCategory(item);
+        }
+    },
+);
+
+watch(
+    () => props.initialSub,
+    (newVal) => {
+        if (newVal) currentSub.value = newVal as string;
+    },
+);
 
 // --- Methods: Toggles ---
 const toggleBrightnessDetail = () => showBrightnessDetail.value = !showBrightnessDetail.value;
@@ -1993,6 +2030,7 @@ watch(isTimeNightMode, (newVal) => {
     display: flex;
     width: 16px;
     height: 16px;
+    transition: transform 0.2s ease;
 }
 .setting-info-sys-right-func-name {
     font-size: 12px;

@@ -293,7 +293,7 @@ export const useSystemStore = defineStore("system", () => {
         },
         {
             id: "user",
-            name: "Guest",
+            name: "Admin",
             icon: "/icons/Contact.png",
             actionName: "noop",
         },
@@ -327,7 +327,7 @@ export const useSystemStore = defineStore("system", () => {
             id: "search",
             name: "搜索",
             icon: "/icons/system/Search1.png",
-            hoverIcon: "/icons/system/Search.png",
+            hoverIcon: "/icons/system/Search2.png",
             iconSize: 18,
             hoverIconSize: 18,
             class: "",
@@ -737,12 +737,13 @@ export const useSystemStore = defineStore("system", () => {
         title: string,
         props: any = {},
     ) => {
-        //检查是否存在 (对于 FileExplorer 特殊处理路径更新逻辑)
+        //检查是否存在
         const existingWindow = openWindows.value.find(
             (win) => win.componentName === componentName,
         );
         if (existingWindow) {
-            if (componentName === "FileExplorer" && props.initialPathId) {
+            // 如果已有窗口实例，合并传入的 props
+            if (props && Object.keys(props).length > 0) {
                 existingWindow.props = { ...existingWindow.props, ...props };
             }
             // 恢复并置顶
@@ -754,7 +755,7 @@ export const useSystemStore = defineStore("system", () => {
         if (!appInfo) return;
         //计算初始位置
         const desktopWidth = window.innerWidth;
-        const desktopHeight = window.innerHeight - 44;
+        const desktopHeight = window.innerHeight - 42;
         const windowWidth = appInfo.windowConfig?.defaultWidth ?? DEFAULT_WINDOW_WIDTH;
         const windowHeight = appInfo.windowConfig?.defaultHeight ?? DEFAULT_WINDOW_HEIGHT;
         const centerLeft = (desktopWidth - windowWidth) / 2;
@@ -820,7 +821,7 @@ export const useSystemStore = defineStore("system", () => {
             win.top = 0;
             win.left = 0;
             win.width = window.innerWidth;
-            win.height = window.innerHeight - 44; // 扣除任务栏高度
+            win.height = window.innerHeight - 42;
         }
     };
     const startResizeStartMenu = (
@@ -916,24 +917,41 @@ export const useSystemStore = defineStore("system", () => {
         const initialTop = win.top;
         const initialLeft = win.left;
 
-        const onMouseMove = (moveEvent: MouseEvent) => {
-            let newLeft = initialLeft + (moveEvent.clientX - startX);
-            let newTop = initialTop + (moveEvent.clientY - startY);
+        // 处理最大化/吸附状态下开始拖拽的特殊还原逻辑
+        let isRestored = false;
+        let restoreInitialLeft = initialLeft;
+        let restoreInitialTop = initialTop;
 
-            // 如果窗口处于全屏或半屏状态，只要一动，就恢复原始大小
-            if (win.isMaximized || win.snapState !== "none") {
+        const onMouseMove = (moveEvent: MouseEvent) => {
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
+
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+
+            // 如果已经移动了一定距离，视为开始拖拽并执行还原
+            if (!isRestored && (win.isMaximized || win.snapState !== "none") && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+                // 计算鼠标在当前大窗口中的横向比例，用于还原后保持鼠标位置
                 const ratio = (moveEvent.clientX - win.left) / win.width;
+                
                 win.isMaximized = false;
                 win.snapState = "none";
                 win.width = win.restoreWidth;
                 win.height = win.restoreHeight;
-                // 调整 newLeft，使鼠标保持在标题栏相对位置
-                newLeft = moveEvent.clientX - win.width * ratio;
-                newTop = moveEvent.clientY - 15; // 假设标题栏高度感应
+                
+                isRestored = true;
+                // 还原状态下，重新计算初始位置，使后续计算出的 newLeft 偏移正确
+                restoreInitialLeft = startX - win.width * ratio;
+                restoreInitialTop = moveEvent.clientY - 15 - (moveEvent.clientY - startY);
             }
 
-            win.left = newLeft;
-            win.top = newTop;
+            if (isRestored) {
+                win.left = restoreInitialLeft + (moveEvent.clientX - startX);
+                win.top = restoreInitialTop + (moveEvent.clientY - startY);
+            } else {
+                win.left = newLeft;
+                win.top = newTop;
+            }
         };
 
         const onMouseUp = (upEvent: MouseEvent) => {
@@ -978,8 +996,7 @@ export const useSystemStore = defineStore("system", () => {
             return; // 本次循环结束，下一帧开始正常拖拽
         }
 
-        // --- 原有的正常拖拽逻辑 ---
-        const desktopHeight = window.innerHeight - 44;
+        const desktopHeight = window.innerHeight - 42;
         let nT = dragState.value.initialTop + (e.clientY - dragState.value.startY);
         let nL = dragState.value.initialLeft + (e.clientX - dragState.value.startX);
 
@@ -998,83 +1015,71 @@ export const useSystemStore = defineStore("system", () => {
         if (!win) return;
 
         bringToFront(id);
-        resizeState.value = {
-            id,
-            startX: e.clientX,
-            startY: e.clientY,
-            startWidth: win.width,
-            startHeight: win.height,
-            startTop: win.top,
-            startLeft: win.left,
-            direction,
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = win.width;
+        const startHeight = win.height;
+        const startTop = win.top;
+        const startLeft = win.left;
+
+        const handleResize = (moveEvent: MouseEvent) => {
+            const dX = moveEvent.clientX - startX;
+            const dY = moveEvent.clientY - startY;
+
+            let nW = startWidth,
+                nH = startHeight,
+                nT = startTop,
+                nL = startLeft;
+
+            if (direction.includes("right")) nW = startWidth + dX;
+            if (direction.includes("bottom")) nH = startHeight + dY;
+            if (direction.includes("left")) {
+                nW = startWidth - dX;
+                nL = startLeft + dX;
+            }
+            if (direction.includes("top")) {
+                nH = startHeight - dY;
+                nT = startTop + dY;
+            }
+
+            // 最小尺寸限制
+            if (nW < MIN_WINDOW_WIDTH) {
+                if (direction.includes("left"))
+                    nL = startLeft + (startWidth - MIN_WINDOW_WIDTH);
+                nW = MIN_WINDOW_WIDTH;
+            }
+            if (nH < MIN_WINDOW_HEIGHT) {
+                if (direction.includes("top"))
+                    nT = startTop + (startHeight - MIN_WINDOW_HEIGHT);
+                nH = MIN_WINDOW_HEIGHT;
+            }
+            
+            // 顶部限制
+            if (nT < 0) {
+                if (direction.includes("top")) {
+                    nH = startHeight + startTop;
+                }
+                nT = 0;
+            }
+
+            // 直接在 handleResize 中更新，减少 state 依赖
+            win.width = nW;
+            win.height = nH;
+            win.top = nT;
+            win.left = nL;
+            win.restoreWidth = nW;
+            win.restoreHeight = nH;
+            win.restoreTop = nT;
+            win.restoreLeft = nL;
+        };
+
+        const stopResize = () => {
+            document.removeEventListener("mousemove", handleResize);
+            document.removeEventListener("mouseup", stopResize);
         };
 
         document.addEventListener("mousemove", handleResize);
         document.addEventListener("mouseup", stopResize);
-    };
-    const handleResize = (e: MouseEvent) => {
-        if (!resizeState.value) return;
-        const {
-            id,
-            startX,
-            startY,
-            startWidth,
-            startHeight,
-            startTop,
-            startLeft,
-            direction,
-        } = resizeState.value;
-        const win = openWindows.value.find((w) => w.id === id);
-        if (!win) return;
-
-        let nW = startWidth,
-            nH = startHeight,
-            nT = startTop,
-            nL = startLeft;
-        const dX = e.clientX - startX,
-            dY = e.clientY - startY;
-
-        if (direction.includes("right")) nW = startWidth + dX;
-        if (direction.includes("bottom")) nH = startHeight + dY;
-        if (direction.includes("left")) {
-            nW = startWidth - dX;
-            nL = startLeft + dX;
-        }
-        if (direction.includes("top")) {
-            nH = startHeight - dY;
-            nT = startTop + dY;
-        }
-
-        // 边界限制逻辑
-        if (nW < MIN_WINDOW_WIDTH) {
-            if (direction.includes("left"))
-                nL = startLeft + (startWidth - MIN_WINDOW_WIDTH);
-            nW = MIN_WINDOW_WIDTH;
-        }
-        if (nH < MIN_WINDOW_HEIGHT) {
-            if (direction.includes("top"))
-                nT = startTop + (startHeight - MIN_WINDOW_HEIGHT);
-            nH = MIN_WINDOW_HEIGHT;
-        }
-        if (nT < 0) {
-            nH = nH + nT;
-            nT = 0;
-        }
-
-        // 更新窗口属性
-        win.width = nW;
-        win.height = nH;
-        win.top = nT;
-        win.left = nL;
-        win.restoreWidth = nW;
-        win.restoreHeight = nH;
-        win.restoreTop = nT;
-        win.restoreLeft = nL;
-    };
-    const stopResize = () => {
-        resizeState.value = null;
-        document.removeEventListener("mousemove", handleResize);
-        document.removeEventListener("mouseup", stopResize);
     };
     const stopDrag = (e: MouseEvent) => {
         if (!dragState.value) return;

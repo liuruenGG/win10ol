@@ -144,7 +144,8 @@
                                         <div class="content-view-top-left-button-name">{{ btn.title }}</div>
                                     </button>
                                     <img src="/icons/Chevron Down.png"
-                                        class="content-view-top-left-button-img2"></img>
+                                        class="content-view-top-left-button-img2"
+                                        :style="{ transform: uiState.openMenu === btn.menuKey ? 'rotate(180deg)' : 'rotate(0deg)' }"></img>
 
                                     <div v-if="uiState.openMenu === btn.menuKey" class="view-popup-menu">
                                         <button v-for="item in btn.subItems" :key="item.label" class="view-menu-item"
@@ -525,6 +526,7 @@ watch(() => props.initialPathId, (newId) => {
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    height: 24px;
     flex-shrink: 1;
     min-width: 35px;
     transition: all 0.2s ease;
@@ -961,6 +963,9 @@ watch(() => props.initialPathId, (newId) => {
     object-fit: contain;
     justify-content: flex-start;
     /* background-color: darkkhaki; */
+    transform-origin: center;
+    transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 120ms ease;
+    will-change: transform, opacity;
 }
 .content-view-top-left-stop {
     display: flex;
@@ -1034,6 +1039,21 @@ watch(() => props.initialPathId, (newId) => {
     font-size: 13px;
     color: #333;
 }
+.explorer-body.dark-theme .view-popup-menu {
+    background-color: #222222d9; /* 深色半透明背景 */
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+}
+.explorer-body.dark-theme .view-popup-menu .view-menu-item {
+    color: #ddd;
+}
+.explorer-body.dark-theme .view-popup-menu .view-menu-item-text {
+    color: #e7e7e7;
+}
+.explorer-body.dark-theme .view-popup-menu .view-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
 .content-view-top-left-stop-2 {
     display: flex;
     width: 4px;

@@ -78,7 +78,7 @@
                                     <span class="menu-item-label">查找</span>
                                 </div>
                                 <div class="menu-item">
-                                    <img class="menu-item-icon" src="/icons/Search1.png" />
+                                    <img class="menu-item-icon" src="/icons/Notepad/change.png" />
                                     <span class="menu-item-label">替换</span>
                                 </div>
                                 <div class="menu-item divider"></div>

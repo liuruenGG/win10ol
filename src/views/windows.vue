@@ -94,8 +94,7 @@
 
                     <TransitionGroup name="window-fade">
                         <div class="app-window" v-for="win in openWindows" :key="win.id" :style="{
-                            top: win.top + 'px',
-                            left: win.left + 'px',
+                            transform: `translate3d(${win.left}px, ${win.top}px, 0)`,
                             zIndex: win.zIndex,
                             width: win.width + 'px',
                             height: win.height + 'px',
@@ -103,8 +102,9 @@
                             @contextmenu.prevent.stop="(e) => handleWindowContextMenu(e, win)" v-show="!win.isMinimized"
                             :class="{
                                 'is-active': win.zIndex === zIndex,
-                                'is-maximized': win.isMaximized,
-                                'is-dragging': (systemStore as any).dragState?.id === win.id || (systemStore as any).resizeState?.id === win.id
+                                'is-maximized': win.isMaximized || win.snapState !== 'none',
+                                'is-dragging': (systemStore as any).dragState?.id === win.id,
+                                'is-resizing': (systemStore as any).resizeState?.id === win.id
                             }">
 
                             <component :is="win.component" :window-id="win.id" :is-maximized="win.isMaximized"
@@ -725,6 +725,10 @@ const vFocus = { mounted: (el: HTMLInputElement) => el.focus() };
     z-index: 1;
 }
 
+.home-view-window {
+    position: relative;
+}
+
 /* 图标 */
 .desktop-icons {
     position: relative;
@@ -907,17 +911,26 @@ const vFocus = { mounted: (el: HTMLInputElement) => el.focus() };
 /* 应用程序窗口 */
 .app-window {
     position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform, width, height;
     background-color: rgba(255, 255, 255, 0);
     display: flex;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 10;
+    /* 包括 border/padding 在 height/width 的计算中，避免 1px 边框或 padding 导致的尺寸差异 */
+    box-sizing: border-box;
     /* 添加过渡效果用于最大化和还原 */
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1), z-index 0s;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), 
+                width 0.3s cubic-bezier(0.22, 1, 0.36, 1), 
+                height 0.3s cubic-bezier(0.22, 1, 0.36, 1), 
+                z-index 0s;
     overflow: hidden;
 }
-.app-window.is-dragging {
-    /* 拖拽时禁用过渡以保证流畅度 */
-    transition: none;
+.app-window.is-dragging,
+.app-window.is-resizing {
+    /* 拖拽和缩放时禁用过渡以保证流畅度 */
+    transition: none !important;
 }
 .app-window.is-active {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
