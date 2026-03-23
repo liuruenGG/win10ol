@@ -1,11 +1,6 @@
 Windows 10 26H2 Concept (Windows on Web)
 一个基于 Web 技术栈构建的 Windows 10 26H2 概念版操作系统仿真项目。本项目旨在探索前端交互的极致可能性，还原流畅、现代的桌面操作体验。
 
-
-
-👥 制作团队
-本项目的诞生离不开以下制作人员的贡献：
-
 # Windows 10 26H2 Concept (Windows on Web)
 
 一个基于 Web 技术栈构建的 Windows 10 26H2 概念版操作系统仿真项目。本项目旨在探索前端交互的极致可能性，还原流畅、现代的桌面操作体验。
@@ -19,8 +14,8 @@ Windows 10 26H2 Concept (Windows on Web)
   <img src="public/show/1-4.png" width="360" alt="screenshot-4" />
 </p>
 
-## 开发团队
-本项目的诞生离不开以下开发者的贡献：
+## 制作团队
+本项目的诞生离不开以下制作人员的贡献：
 
 - 概念设计 (Concept Design): [戌犬·朱狼]
 - 项目开发 (Lead Developer): [花尾鸽]
