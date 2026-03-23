@@ -3,8 +3,8 @@ Windows 10 26H2 Concept (Windows on Web)
 
 
 
-👥 开发团队
-本项目的诞生离不开以下开发者的贡献：
+👥 制作团队
+本项目的诞生离不开以下制作人员的贡献：
 
 # Windows 10 26H2 Concept (Windows on Web)
 
